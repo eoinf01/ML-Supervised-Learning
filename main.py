@@ -42,13 +42,16 @@ def q2(clf_type,sample_size,data,target,clf_variable):
     prediction_time = []
     accuracy = []
     if clf_type == "Perceptron":
+        print("#### PERCEPTON CLASSIFIER ####")
         clf = linear_model.Perceptron()
     elif clf_type == "SVM":
         clf = svm.SVC(gamma=clf_variable)
     else:
         clf = linear_model.Perceptron()
-
+    fold = 0
     for train_index, test_index in kf.split(newData, newTarget):
+        fold += 1
+        print("Current K-Fold: ",fold)
         startTrain = time.time()
         clf.fit(newData[train_index], newTarget[train_index])
         endTrain = time.time()
@@ -63,6 +66,8 @@ def q2(clf_type,sample_size,data,target,clf_variable):
         training_time.append(trainTime)
         prediction_time.append(predictionTime)
         accuracy.append(accuracyMetric)
+
+
     print("Max training time",max(training_time))
     print("Min training time",min(training_time))
     print("average training time",np.mean(training_time))
@@ -73,11 +78,32 @@ def q2(clf_type,sample_size,data,target,clf_variable):
     print("Min accuracy score",min(accuracy))
     print("Average accuracy score",np.mean(accuracy))
 
-    return training_time,prediction_time,accuracy
+    return training_time,prediction_time,np.mean(accuracy)
+
+
+def q3():
+    input_size = []
+    training_eval =[]
+    prediction_eval = []
+    accuracy_svc = []
+
+    for x in range(1000,len(data),1000):
+        training,prediction,accuracy = q2("Perceptron", 14000, data, target,0)
+        input_size.append(x)
+        accuracy_svc.append(accuracy)
+        training_eval.append(np.max(training))
+        prediction_eval.append(np.max(prediction))
+
+    plt.plot(input_size, training_eval, label="Training times")
+    plt.plot(input_size, prediction_eval, label="Test times")
+    plt.xlabel("Sample Size")
+    plt.ylabel("Runtimes")
+    plt.show()
+    print("\nMean prediction accuracy of percepton classifier: ",np.mean(accuracy_svc))
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     data,target = q1()
-
+    q3()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
