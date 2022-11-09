@@ -45,7 +45,8 @@ def q2(clf_type,sample_size,data,target,clf_variable):
         print("#### PERCEPTON CLASSIFIER ####")
         clf = linear_model.Perceptron()
     elif clf_type == "SVM":
-        clf = svm.SVC(gamma=clf_variable)
+        print("#### SVM RADIAL BASIS CLASSIFIER ####")
+        clf = svm.SVC(kernel="rbf",gamma=clf_variable)
     else:
         clf = linear_model.Perceptron()
     fold = 0
@@ -101,9 +102,40 @@ def q3():
     plt.show()
     print("\nMean prediction accuracy of percepton classifier: ",np.mean(accuracy_svc))
 
+def q4():
+    gamma_ranges = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1]
+    accucaries = []
+    input_size= []
+
+    for x in gamma_ranges:
+        training, prediction, accuracy = q2("SVM", 3000, data, target, x)
+        accucaries.append(np.mean(accuracy))
+    best_accuracy = np.max(accucaries)
+    best_y =  gamma_ranges[accucaries.index(best_accuracy)]
+    print("\nBest Y value: ",best_y)
+    print("Best average classification accuracy: ", best_accuracy)
+
+    training_eval = []
+    prediction_eval = []
+    for x in range(1000, len(data), 1000):
+        input_size.append(x)
+        training, prediction, accuracy = q2("SVM", x, data, target, best_y)
+        training_eval.append(np.mean(training))
+        prediction_eval.append(np.mean(prediction))
+
+    plt.plot(input_size, training_eval, label="Training times")
+    plt.plot(input_size, prediction_eval, label="Test times")
+    plt.xlabel("Sample Size")
+    plt.ylabel("Runtimes")
+    plt.show()
+
+
+
+
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     data,target = q1()
-    q3()
+    q4()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
