@@ -5,7 +5,9 @@
 import time
 
 from sklearn import datasets
+from sklearn import tree
 from sklearn import linear_model
+from sklearn import neighbors
 from sklearn import svm
 from sklearn import metrics
 from sklearn import model_selection
@@ -47,6 +49,11 @@ def q2(clf_type,sample_size,data,target,clf_variable):
     elif clf_type == "SVM":
         print("#### SVM RADIAL BASIS CLASSIFIER ####")
         clf = svm.SVC(kernel="rbf",gamma=clf_variable)
+    elif clf_type == "KNN":
+        print("#### KNN CLASSIFIER ####")
+        clf = neighbors.KNeighborsClassifier(n_neighbors=clf_variable)
+    elif clf_type == "DTC":
+        clf = tree.DecisionTreeClassifier()
     else:
         clf = linear_model.Perceptron()
     fold = 0
@@ -88,6 +95,8 @@ def q3():
     prediction_eval = []
     accuracy_svc = []
 
+    training, prediction, accuracy = q2("Perceptron", len(data), data, target, 0)
+    print("Mean prediction accuracy: ",accuracy)
     for x in range(1000,len(data),1000):
         training,prediction,accuracy = q2("Perceptron", 14000, data, target,0)
         input_size.append(x)
@@ -129,13 +138,39 @@ def q4():
     plt.ylabel("Runtimes")
     plt.show()
 
+def q5():
+    accucaries = []
+    k_values = [*range(1,15)]
+    print(k_values)
+    input_size = []
+    for k in k_values:
+        training, prediction, accuracy = q2("KNN", len(data), data, target, k)
+        accucaries.append(np.mean(accuracy))
+    best_accuracy = np.max(accucaries)
+    best_k = k_values[accucaries.index(best_accuracy)]
 
+    print("\nBest K value: ", best_k)
+    print("Best mean classification accuracy: ", best_accuracy)
+
+    training_eval = []
+    prediction_eval = []
+    for x in range(1000, len(data), 1000):
+        input_size.append(x)
+        training, prediction, accuracy = q2("KNN", x, data, target, best_k)
+        training_eval.append(np.mean(training))
+        prediction_eval.append(np.mean(prediction))
+
+    plt.plot(input_size, training_eval, label="Training times")
+    plt.plot(input_size, prediction_eval, label="Test times")
+    plt.xlabel("Sample Size")
+    plt.ylabel("Runtimes")
+    plt.show()
 
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     data,target = q1()
-    q4()
+    q5()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
