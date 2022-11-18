@@ -4,7 +4,6 @@
 # Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 import time
 
-from sklearn import datasets
 from sklearn import tree
 from sklearn import linear_model
 from sklearn import neighbors
@@ -15,6 +14,8 @@ import pandas as pd
 import numpy as np
 import random
 import matplotlib.pyplot as plt
+
+dict={}
 
 def q1():
     data = pd.read_csv('product_images.csv')
@@ -33,7 +34,7 @@ def q1():
 
     return data,target
 
-def q2(clf_type,sample_size,data,target,clf_variable):
+def q2(clf_type,sample_size,data,target):
     target = target.to_numpy()
     sample_indexes = np.random.randint(data.shape[0],size=sample_size)
     newData = data[sample_indexes, :]
@@ -43,19 +44,7 @@ def q2(clf_type,sample_size,data,target,clf_variable):
     training_time = []
     prediction_time = []
     accuracy = []
-    if clf_type == "Perceptron":
-        print("#### PERCEPTON CLASSIFIER ####")
-        clf = linear_model.Perceptron()
-    elif clf_type == "SVM":
-        print("#### SVM RADIAL BASIS CLASSIFIER ####")
-        clf = svm.SVC(kernel="rbf",gamma=clf_variable)
-    elif clf_type == "KNN":
-        print("#### KNN CLASSIFIER ####")
-        clf = neighbors.KNeighborsClassifier(n_neighbors=clf_variable)
-    elif clf_type == "DTC":
-        clf = tree.DecisionTreeClassifier()
-    else:
-        clf = linear_model.Perceptron()
+    clf = clf_type
     fold = 0
     for train_index, test_index in kf.split(newData, newTarget):
         fold += 1
@@ -88,17 +77,26 @@ def q2(clf_type,sample_size,data,target,clf_variable):
 
     return training_time,prediction_time,np.mean(accuracy)
 
-
+##Percepton Classifier Evaluation
 def q3():
     input_size = []
     training_eval =[]
     prediction_eval = []
     accuracy_svc = []
 
-    training, prediction, accuracy = q2("Perceptron", len(data), data, target, 0)
+    training, prediction, accuracy = q2(linear_model.Perceptron(), len(data), data, target)
+    dict["Perceptron"] = {
+        "training": 0,
+        "prediction": 0,
+        "accuracy": 0
+    }
+    dict["Perceptron"]["training"] = training
+    dict["Perceptron"]["prediction"] = prediction
+    dict["Perceptron"]["accuracy"] = accuracy
+
     print("Mean prediction accuracy: ",accuracy)
     for x in range(1000,len(data),1000):
-        training,prediction,accuracy = q2("Perceptron", 14000, data, target,0)
+        training,prediction,accuracy = q2(linear_model.Perceptron(), x, data, target)
         input_size.append(x)
         accuracy_svc.append(accuracy)
         training_eval.append(np.max(training))
@@ -108,19 +106,35 @@ def q3():
     plt.plot(input_size, prediction_eval, label="Test times")
     plt.xlabel("Sample Size")
     plt.ylabel("Runtimes")
+    plt.title("Perceptron Times & Sample Size Relationship")
+    plt.legend(loc='upper left')
     plt.show()
     print("\nMean prediction accuracy of percepton classifier: ",np.mean(accuracy_svc))
 
+#SVM Classifier Evaluation
 def q4():
-    gamma_ranges = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1]
+    gamma_ranges = [1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
     accucaries = []
     input_size= []
-
+    best_training = []
+    best_prediction = []
     for x in gamma_ranges:
-        training, prediction, accuracy = q2("SVM", 3000, data, target, x)
+        #Change the len(data) to another sample size if taking too long to run
+        training, prediction, accuracy = q2(svm.SVC(kernel="rbf",gamma=x), len(data), data, target)
+        best_training.append(training)
+        best_prediction.append(prediction)
         accucaries.append(np.mean(accuracy))
     best_accuracy = np.max(accucaries)
-    best_y =  gamma_ranges[accucaries.index(best_accuracy)]
+    dict["SVM"] = {
+        "training": 0,
+        "prediction": 0,
+        "accuracy": 0
+    }
+    dict["SVM"]["training"] = best_training[accucaries.index(best_accuracy)]
+    dict["SVM"]["prediction"] = best_prediction[accucaries.index(best_accuracy)]
+    dict["SVM"]["accuracy"] = best_accuracy
+
+    best_y = gamma_ranges[accucaries.index(best_accuracy)]
     print("\nBest Y value: ",best_y)
     print("Best average classification accuracy: ", best_accuracy)
 
@@ -128,7 +142,7 @@ def q4():
     prediction_eval = []
     for x in range(1000, len(data), 1000):
         input_size.append(x)
-        training, prediction, accuracy = q2("SVM", x, data, target, best_y)
+        training, prediction, accuracy = q2(svm.SVC(kernel="rbf",gamma=best_y), x, data, target)
         training_eval.append(np.mean(training))
         prediction_eval.append(np.mean(prediction))
 
@@ -136,18 +150,34 @@ def q4():
     plt.plot(input_size, prediction_eval, label="Test times")
     plt.xlabel("Sample Size")
     plt.ylabel("Runtimes")
+    plt.legend(loc='upper left')
+
+    plt.title("SVM Times & Sample Size Relationship")
     plt.show()
 
+#Nearest Neighbours Classifier Evaluation
 def q5():
     accucaries = []
     k_values = [*range(1,15)]
     print(k_values)
     input_size = []
+    best_training = []
+    best_prediction = []
     for k in k_values:
-        training, prediction, accuracy = q2("KNN", len(data), data, target, k)
-        accucaries.append(np.mean(accuracy))
+        training, prediction, accuracy = q2(neighbors.KNeighborsClassifier(n_neighbors=k), len(data), data, target)
+        accucaries.append(accuracy)
+        best_training.append(training)
+        best_prediction.append(prediction)
+
     best_accuracy = np.max(accucaries)
     best_k = k_values[accucaries.index(best_accuracy)]
+    dict["KNN"] = {
+        "training": 0,
+        "prediction": 0
+    }
+    dict["KNN"]["training"] = best_training[accucaries.index(best_accuracy)]
+    dict["KNN"]["prediction"] = best_prediction[accucaries.index(best_accuracy)]
+    dict["KNN"]["accuracy"] = best_accuracy
 
     print("\nBest K value: ", best_k)
     print("Best mean classification accuracy: ", best_accuracy)
@@ -156,7 +186,7 @@ def q5():
     prediction_eval = []
     for x in range(1000, len(data), 1000):
         input_size.append(x)
-        training, prediction, accuracy = q2("KNN", x, data, target, best_k)
+        training, prediction, accuracy = q2(neighbors.KNeighborsClassifier(n_neighbors=best_k), x, data, target)
         training_eval.append(np.mean(training))
         prediction_eval.append(np.mean(prediction))
 
@@ -164,13 +194,50 @@ def q5():
     plt.plot(input_size, prediction_eval, label="Test times")
     plt.xlabel("Sample Size")
     plt.ylabel("Runtimes")
+    plt.legend(loc='upper left')
+
+    plt.title("KNN Times & Sample Size Relationship")
     plt.show()
 
+#Decision Tree Classifier Evaluation
+def q6():
+    training, prediction, accuracy = q2(tree.DecisionTreeClassifier(), len(data), data, target)
+    dict["DTC"] = {
+        "training": 0,
+        "prediction": 0,
+        "accuracy": 0
+    }
+    dict["DTC"]["training"] = training
+    dict["DTC"]["prediction"] = prediction
+    dict["DTC"]["accuracy"] = accuracy
 
+    print("Classification Accuracy: ",accuracy)
+    input_size = []
+    training_eval= []
+    prediction_eval = []
+    for x in range(1000, len(data), 1000):
+        input_size.append(x)
+        training, prediction, accuracy = q2(tree.DecisionTreeClassifier(), x, data, target)
+        training_eval.append(np.mean(training))
+        prediction_eval.append(np.mean(prediction))
+
+    plt.plot(input_size, training_eval, label="Training times")
+    plt.plot(input_size, prediction_eval, label="Test times")
+    plt.xlabel("Sample Size")
+    plt.ylabel("Runtimes")
+    plt.legend(loc='upper left')
+
+    plt.title("DTC Times & Sample Size Relationship")
+    plt.show()
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    dict = {}
     data,target = q1()
+    q3()
+    q4()
     q5()
+    q6()
+    q7()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
