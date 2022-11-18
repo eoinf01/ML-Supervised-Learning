@@ -230,6 +230,41 @@ def q6():
     plt.title("DTC Times & Sample Size Relationship")
     plt.show()
 
+
+def q7():
+
+    print("Max training time for Perceptron: ", np.max(dict["Perceptron"]["training"]))
+    print("Max prediction time for Perceptron: ", np.max(dict["Perceptron"]["prediction"]))
+    print("Min training time for Perceptron: ", np.min(dict["Perceptron"]["training"]))
+    print("Min prediction time for Perceptron: ", np.min(dict["Perceptron"]["prediction"]))
+    print("Average training time for Perceptron: ", np.mean(dict["Perceptron"]["training"]))
+    print("Average prediction time for Perceptron: ", np.mean(dict["Perceptron"]["prediction"]))
+    print("Classification accuracy for Perceptron: ", dict["Perceptron"]["accuracy"])
+
+    print("Max training time for SVM: ", np.max(dict["SVM"]["training"]))
+    print("Max prediction time for SVM: ", np.max(dict["SVM"]["prediction"]))
+    print("Min training time for SVM: ", np.min(dict["SVM"]["training"]))
+    print("Min prediction time for SVM: ", np.min(dict["SVM"]["prediction"]))
+    print("Average training time for SVM: ", np.mean(dict["SVM"]["training"]))
+    print("Average prediction time for SVM: ", np.mean(dict["SVM"]["prediction"]))
+    print("Classification accuracy for SVM: ", dict["SVM"]["accuracy"])
+
+    print("Max training time for KNN: ", np.max(dict["KNN"]["training"]))
+    print("Max prediction time for KNN: ", np.max(dict["KNN"]["prediction"]))
+    print("Min training time for KNN: ", np.min(dict["KNN"]["training"]))
+    print("Min prediction time for KNN: ", np.min(dict["KNN"]["prediction"]))
+    print("Average training time for KNN: ", np.mean(dict["KNN"]["training"]))
+    print("Average prediction time for KNN: ", np.mean(dict["KNN"]["prediction"]))
+    print("Classification accuracy for KNN: ", dict["KNN"]["accuracy"])
+
+    print("Max training time for DTC: ", np.max(dict["DTC"]["training"]))
+    print("Max prediction time for DTC: ", np.max(dict["DTC"]["prediction"]))
+    print("Min training time for DTC: ", np.min(dict["DTC"]["training"]))
+    print("Min prediction time for DTC: ", np.min(dict["DTC"]["prediction"]))
+    print("Average training time for DTC: ", np.mean(dict["DTC"]["training"]))
+    print("Average prediction time for DTC: ", np.mean(dict["DTC"]["prediction"]))
+    print("Classification accuracy for DTC: ", dict["DTC"]["accuracy"])
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     dict = {}
